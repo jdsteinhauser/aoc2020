@@ -2,6 +2,20 @@ defmodule Day8 do
 
   def part1(), do: exec_part1(instructions(), 0, 0, MapSet.new())
 
+  def part2() do
+    insts = instructions()
+
+    with_idx = 
+      insts
+      |> Enum.with_index()
+      |> Enum.reject(fn {x,_} -> x == :acc end)
+
+    with_idx
+    |> Enum.map(fn {{inst, value}, idx} -> List.replace_at(insts, idx, {(if inst == :nop, do: :jmp, else: :nop), value}) end)
+    |> Enum.find(fn xs -> exec_part2(xs, 0, 0, MapSet.new()) != false end)
+    |> exec_part2(0,0, MapSet.new())
+  end
+
   def instructions() do
     "day8.txt"
     |> File.stream!()
@@ -20,6 +34,17 @@ defmodule Day8 do
     else
       %{move: move, acc: new_acc} = execute(Enum.at(inst, idx), acc)
       exec_part1(inst, idx + move, new_acc, MapSet.put(executed, idx))
+    end
+  end
+
+  def exec_part2(inst, idx, acc, _executed) when idx >= length(inst), do: acc
+  def exec_part2(inst, idx, acc, executed) do
+    if MapSet.member?(executed, idx)
+    do
+      false
+    else
+      %{move: move, acc: new_acc} = execute(Enum.at(inst, idx), acc)
+      exec_part2(inst, idx + move, new_acc, MapSet.put(executed, idx))
     end
   end
 
