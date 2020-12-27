@@ -9,6 +9,15 @@ defmodule Day16 do
     |> Enum.sum()
   end
 
+  def part2 do
+    %{rules: rules, ticket: mine, nearby: tickets} = input()
+    
+    valid_tickets =
+      tickets
+      |> Enum.flat_map(& &1)
+      |> Enum.filter(fn x -> Enum.any?(rules, fn rule -> rule.func.(x) end) end)
+  end
+
   def input do
     "day16.txt"
     |> File.read!()
